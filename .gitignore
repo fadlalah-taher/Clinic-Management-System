@@ -1,1 +1,3 @@
 node_modules
+# Angular cache
+.angular/cache
