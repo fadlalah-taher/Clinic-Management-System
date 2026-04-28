@@ -1,0 +1,130 @@
+/* Global styles – plain CSS (no SCSS) */
+
+:root {
+  --primary: #0d6efd;
+  --sidebar-width: 240px;
+  --sidebar-bg-doctor:  #1a2238;
+  --sidebar-bg-patient: #1b3a2e;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f4f8;
+}
+
+/* ── Sidebar ──────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: #1a2238;
+  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding-top: 1rem;
+}
+
+.sidebar.patient-theme { background: #1b3a2e; }
+
+.sidebar .brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 1rem 1.5rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 1rem;
+}
+
+.sidebar .role-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.sidebar a.nav-link {
+  color: rgba(255,255,255,0.75);
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.sidebar a.nav-link:hover,
+.sidebar a.nav-link.active {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+/* ── Main layout ──────────────────────────────────────── */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Table wrapper ────────────────────────────────────── */
+.table-container {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* ── Status badges ────────────────────────────────────── */
+.badge-scheduled { background-color: #0d6efd; color: #fff; }
+.badge-completed { background-color: #198754; color: #fff; }
+.badge-cancelled { background-color: #dc3545; color: #fff; }
+
+/* ── Avatars ──────────────────────────────────────────── */
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-lg {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ── Search bar ───────────────────────────────────────── */
+.search-bar { max-width: 340px; }
+
+/* ── Role selection cards (register) ──────────────────── */
+.role-card {
+  border: 2px solid #dee2e6;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.role-card:hover { border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13,110,253,.15); }
+.role-card.selected { border-color: #0d6efd; background: rgba(13,110,253,.05); }
+.role-card.selected-patient { border-color: #198754; background: rgba(25,135,84,.05); }
+.role-card.selected-patient:hover { border-color: #198754; box-shadow: 0 0 0 3px rgba(25,135,84,.15); }
+
+/* ── Auth pages ───────────────────────────────────────── */
+.auth-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a2238 0%, #2d4a6e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
