@@ -70,7 +70,7 @@ import { AuthService } from '../../../services/auth.service';
 
           <!-- PDF Upload -->
           <div class="mb-4">
-            <label class="form-label">CV Document (PDF)</label>
+            <label class="form-label">Doctor ID Document (PDF)</label>
             <input type="file" class="form-control" accept="application/pdf"
               (change)="onCvSelected($event)">
             <small *ngIf="cvFileName" class="text-muted d-block mt-1">

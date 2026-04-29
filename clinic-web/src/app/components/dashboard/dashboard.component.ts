@@ -13,8 +13,9 @@ import { Appointment, User } from '../../models/models';
       <!-- ==================== DOCTOR DASHBOARD ==================== -->
       <ng-container *ngIf="isDoctor">
         <div class="d-flex align-items-center gap-3 mb-4">
-          <div class="avatar-lg bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center">
-            <i class="bi bi-person-badge fs-3"></i>
+          <div class="avatar-lg bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center overflow-hidden">
+            <img *ngIf="user?.profile_image_url" [src]="user!.profile_image_url" style="width:100%;height:100%;object-fit:cover" alt="profile">
+            <i *ngIf="!user?.profile_image_url" class="bi bi-person-badge fs-3"></i>
           </div>
           <div>
             <h3 class="mb-0 fw-bold">Welcome, Dr. {{ user?.first_name || user?.username }}</h3>
@@ -110,15 +111,11 @@ import { Appointment, User } from '../../models/models';
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white fw-semibold">Quick Actions</div>
           <div class="card-body d-flex gap-2 flex-wrap">
-            <a routerLink="/patients" class="btn btn-outline-success">
-              <i class="bi bi-people me-1"></i> Manage Patients
-            </a>
             <a routerLink="/medications" class="btn btn-outline-secondary">
               <i class="bi bi-capsule me-1"></i> Medications
             </a>
-            <a *ngIf="user?.doctor_id" [routerLink]="['/doctors', user?.doctor_id, 'edit']"
-              class="btn btn-outline-primary">
-              <i class="bi bi-person-gear me-1"></i> Edit My Profile
+            <a routerLink="/profile" class="btn btn-outline-primary">
+              <i class="bi bi-person-gear me-1"></i> My Profile
             </a>
           </div>
         </div>
@@ -127,8 +124,9 @@ import { Appointment, User } from '../../models/models';
       <!-- ==================== PATIENT DASHBOARD ==================== -->
       <ng-container *ngIf="isPatient">
         <div class="d-flex align-items-center gap-3 mb-4">
-          <div class="avatar-lg bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center">
-            <i class="bi bi-person-heart fs-3"></i>
+          <div class="avatar-lg bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center overflow-hidden">
+            <img *ngIf="user?.profile_image_url" [src]="user!.profile_image_url" style="width:100%;height:100%;object-fit:cover" alt="profile">
+            <i *ngIf="!user?.profile_image_url" class="bi bi-person-heart fs-3"></i>
           </div>
           <div>
             <h3 class="mb-0 fw-bold">Welcome, {{ user?.first_name || user?.username }}</h3>
@@ -205,10 +203,13 @@ import { Appointment, User } from '../../models/models';
         </div>
 
         <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white fw-semibold">Find a Doctor</div>
-          <div class="card-body">
+          <div class="card-header bg-white fw-semibold">Quick Actions</div>
+          <div class="card-body d-flex gap-2 flex-wrap">
             <a routerLink="/doctors" class="btn btn-outline-primary">
-              <i class="bi bi-person-badge me-1"></i> Browse Our Doctors
+              <i class="bi bi-person-badge me-1"></i> Browse Doctors
+            </a>
+            <a routerLink="/profile" class="btn btn-outline-secondary">
+              <i class="bi bi-person-gear me-1"></i> My Profile
             </a>
           </div>
         </div>

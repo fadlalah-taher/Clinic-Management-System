@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PatientService } from '../../../services/patient.service';
+import { AuthService } from '../../../services/auth.service';
 import { Patient } from '../../../models/models';
 
 @Component({
@@ -7,7 +8,7 @@ import { Patient } from '../../../models/models';
   template: `
     <div class="page-header">
       <h3>Patients</h3>
-      <a routerLink="/patients/new" class="btn btn-primary">
+      <a *ngIf="!isDoctor" routerLink="/patients/new" class="btn btn-primary">
         <i class="bi bi-plus-circle me-1"></i> Add Patient
       </a>
     </div>
@@ -48,12 +49,17 @@ import { Patient } from '../../../models/models';
             <td>{{ p.date_of_birth }}</td>
             <td>{{ p.phone || '-' }}</td>
             <td>
-              <a [routerLink]="['/patients', p.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">
-                <i class="bi bi-pencil"></i>
+              <a [routerLink]="['/patients', p.id]" class="btn btn-sm btn-outline-primary me-1">
+                <i class="bi bi-eye"></i>
               </a>
-              <button (click)="delete(p)" class="btn btn-sm btn-outline-danger">
-                <i class="bi bi-trash"></i>
-              </button>
+              <ng-container *ngIf="!isDoctor">
+                <a [routerLink]="['/patients', p.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button (click)="delete(p)" class="btn btn-sm btn-outline-danger">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </ng-container>
             </td>
           </tr>
           <tr *ngIf="patients.length === 0">
@@ -85,10 +91,14 @@ export class PatientListComponent implements OnInit {
   prev: string | null = null;
   search = '';
   ordering = 'name';
+  isDoctor = false;
 
-  constructor(private svc: PatientService) {}
+  constructor(private svc: PatientService, private auth: AuthService) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.isDoctor = this.auth.isDoctor();
+    this.load();
+  }
 
   load(): void {
     this.page = 1;

@@ -10,9 +10,20 @@ from bson.errors import InvalidId
 
 from rest_framework import viewsets, permissions, filters as drf_filters, status
 from rest_framework.decorators import action
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
+
+
+class IsAdminOrReadOnly(BasePermission):
+    """Allow read (GET/HEAD/OPTIONS) to any authenticated user; write only to admins."""
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user.is_staff
 
 from .models import Doctor, Medication
 from .serializers import DoctorSerializer, MedicationSerializer
@@ -47,6 +58,24 @@ def _get_doctor_data(doctor_id):
         return None
 
 
+def _get_patient_data(patient_id):
+    """Return a small dict snapshot of a MongoDB Patient (or None)."""
+    if not patient_id:
+        return None
+    try:
+        doc = patients_collection.find_one({'_id': ObjectId(str(patient_id))})
+        if doc is None:
+            return None
+        return {
+            'id': str(doc['_id']),
+            'name': doc.get('name', ''),
+            'email': doc.get('email', ''),
+            'phone': doc.get('phone', ''),
+        }
+    except Exception:
+        return None
+
+
 def _get_medication_data(med_ids):
     """Return a list of small Medication dicts for the given SQL ids."""
     if not med_ids:
@@ -62,7 +91,7 @@ def _get_medication_data(med_ids):
 class DoctorViewSet(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter, drf_filters.OrderingFilter]
     filterset_class = DoctorFilter
     search_fields = ['name', 'email', 'specialty']
@@ -83,6 +112,7 @@ class DoctorViewSet(viewsets.ModelViewSet):
         for doc in cursor:
             doc = _serialize_doc(doc)
             doc['doctor_detail'] = _get_doctor_data(doc.get('doctor_id'))
+            doc['patient_detail'] = _get_patient_data(doc.get('patient_id'))
             doc['medications_detail'] = _get_medication_data(doc.get('medication_ids', []))
             results.append(doc)
         return Response(results)
@@ -107,7 +137,7 @@ class MedicationViewSet(viewsets.ModelViewSet):
 # ─────────────────────────────────────────────────────────────
 
 class PatientListCreateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self, request):
         query = {}
@@ -132,7 +162,12 @@ class PatientListCreateView(APIView):
 
         total = patients_collection.count_documents(query)
         cursor = patients_collection.find(query).sort(sort_field, sort_dir).skip(skip).limit(page_size)
-        results = [_serialize_doc(doc) for doc in cursor]
+        results = []
+        for doc in cursor:
+            doc = _serialize_doc(doc)
+            if doc.get('profile_image'):
+                doc['profile_image_url'] = request.build_absolute_uri(f"/media/{doc['profile_image']}")
+            results.append(doc)
 
         return Response({
             'count': total,
@@ -168,7 +203,7 @@ class PatientListCreateView(APIView):
 
 
 class PatientDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
 
     def _get_patient(self, pk):
         try:
@@ -180,7 +215,12 @@ class PatientDetailView(APIView):
         doc = self._get_patient(pk)
         if doc is None:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(_serialize_doc(doc))
+        doc = _serialize_doc(doc)
+        if doc.get('profile_image'):
+            doc['profile_image_url'] = request.build_absolute_uri(f"/media/{doc['profile_image']}")
+        if doc.get('health_book'):
+            doc['health_book_url'] = request.build_absolute_uri(f"/media/{doc['health_book']}")
+        return Response(doc)
 
     def put(self, request, pk):
         doc = self._get_patient(pk)
@@ -289,6 +329,7 @@ class AppointmentListCreateView(APIView):
         for doc in cursor:
             doc = _serialize_doc(doc)
             doc['doctor_detail'] = _get_doctor_data(doc.get('doctor_id'))
+            doc['patient_detail'] = _get_patient_data(doc.get('patient_id'))
             doc['medications_detail'] = _get_medication_data(doc.get('medication_ids', []))
             results.append(doc)
 
@@ -337,6 +378,7 @@ class AppointmentListCreateView(APIView):
         doc = appointments_collection.find_one({'_id': result.inserted_id})
         doc = _serialize_doc(doc)
         doc['doctor_detail'] = _get_doctor_data(doc.get('doctor_id'))
+        doc['patient_detail'] = _get_patient_data(doc.get('patient_id'))
         doc['medications_detail'] = _get_medication_data(doc.get('medication_ids', []))
         return Response(doc, status=status.HTTP_201_CREATED)
 
@@ -356,6 +398,7 @@ class AppointmentDetailView(APIView):
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
         doc = _serialize_doc(doc)
         doc['doctor_detail'] = _get_doctor_data(doc.get('doctor_id'))
+        doc['patient_detail'] = _get_patient_data(doc.get('patient_id'))
         doc['medications_detail'] = _get_medication_data(doc.get('medication_ids', []))
         return Response(doc)
 
@@ -386,6 +429,7 @@ class AppointmentDetailView(APIView):
         updated = appointments_collection.find_one({'_id': ObjectId(pk)})
         updated = _serialize_doc(updated)
         updated['doctor_detail'] = _get_doctor_data(updated.get('doctor_id'))
+        updated['patient_detail'] = _get_patient_data(updated.get('patient_id'))
         updated['medications_detail'] = _get_medication_data(updated.get('medication_ids', []))
         return Response(updated)
 

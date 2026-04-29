@@ -18,7 +18,10 @@ import { User } from '../../../models/models';
             {{ user.first_name || user.username }}
             <ng-container *ngIf="user.last_name"> {{ user.last_name }}</ng-container>
           </span>
-          <i class="bi bi-person-circle fs-5 text-secondary"></i>
+          <img *ngIf="user.profile_image_url" [src]="user.profile_image_url"
+            style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid #dee2e6"
+            alt="profile">
+          <i *ngIf="!user.profile_image_url" class="bi bi-person-circle fs-5 text-secondary"></i>
         </ng-container>
       </div>
     </nav>

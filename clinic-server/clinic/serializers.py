@@ -18,12 +18,19 @@ class RegisterSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=['doctor', 'patient'])
 
     # Doctor-specific
-    specialty = serializers.CharField(required=False, default='general')
-    phone = serializers.CharField(required=False, default='')
+    specialty = serializers.CharField(required=False, default='general', allow_blank=True)
+    phone = serializers.CharField(required=False, default='', allow_blank=True)
 
     # Patient-specific
     date_of_birth = serializers.DateField(required=False, allow_null=True, default=None)
-    address = serializers.CharField(required=False, default='')
+
+    def to_internal_value(self, data):
+        # Coerce empty string date_of_birth to None before field-level validation
+        if data.get('date_of_birth') == '':
+            data = data.copy() if hasattr(data, 'copy') else dict(data)
+            data['date_of_birth'] = None
+        return super().to_internal_value(data)
+    address = serializers.CharField(required=False, default='', allow_blank=True)
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
@@ -72,6 +79,7 @@ class RegisterSerializer(serializers.Serializer):
                     specialty=specialty or 'general',
                     email=validated_data['email'],
                     phone=phone,
+                    date_of_birth=date_of_birth,
                 )
             UserProfile.objects.create(user=user, role='doctor', doctor=doctor)
         else:
@@ -94,6 +102,9 @@ class RegisterSerializer(serializers.Serializer):
             UserProfile.objects.create(user=user, role='patient', patient_mongo_id=patient_mongo_id)
 
         return user
+
+    def to_representation(self, instance):
+        return {'detail': 'Registration successful.', 'username': instance.username}
 
 
 class UserSerializer(serializers.ModelSerializer):

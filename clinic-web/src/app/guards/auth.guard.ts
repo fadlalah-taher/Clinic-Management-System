@@ -34,3 +34,14 @@ export class PatientGuard implements CanActivate {
     return false;
   }
 }
+
+@Injectable({ providedIn: 'root' })
+export class NotDoctorGuard implements CanActivate {
+  constructor(private auth: AuthService, private router: Router) {}
+
+  canActivate(): boolean {
+    if (!this.auth.isDoctor()) return true;
+    this.router.navigate(['/dashboard']);
+    return false;
+  }
+}

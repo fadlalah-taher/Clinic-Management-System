@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PatientService } from '../../../services/patient.service';
+import { AuthService } from '../../../services/auth.service';
 import { Patient, Appointment } from '../../../models/models';
 
 @Component({
@@ -9,7 +10,7 @@ import { Patient, Appointment } from '../../../models/models';
     <div class="page-header">
       <h3>Patient Profile</h3>
       <div class="d-flex gap-2">
-        <a [routerLink]="['/patients', patient?.id, 'edit']" class="btn btn-outline-primary">
+        <a *ngIf="!isDoctor" [routerLink]="['/patients', patient?.id, 'edit']" class="btn btn-outline-primary">
           <i class="bi bi-pencil me-1"></i> Edit
         </a>
         <a routerLink="/patients" class="btn btn-outline-secondary">
@@ -85,10 +86,12 @@ import { Patient, Appointment } from '../../../models/models';
 export class PatientDetailComponent implements OnInit {
   patient?: Patient;
   appointments: Appointment[] = [];
+  isDoctor = false;
 
-  constructor(private route: ActivatedRoute, private svc: PatientService) {}
+  constructor(private route: ActivatedRoute, private svc: PatientService, private auth: AuthService) {}
 
   ngOnInit(): void {
+    this.isDoctor = this.auth.isDoctor();
     const id = this.route.snapshot.paramMap.get('id')!;
     this.svc.getById(id).subscribe(p => this.patient = p);
     this.svc.getAppointments(id).subscribe(list => this.appointments = list);

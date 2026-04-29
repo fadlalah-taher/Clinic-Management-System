@@ -201,7 +201,13 @@ export class AppointmentFormComponent implements OnInit {
 
     if (this.isPatient) {
       this.form.get('doctor_id')?.setValidators(Validators.required);
-      this.doctorSvc.getAll({ page_size: '1000' }).subscribe(r => this.doctors = r.results || r);
+      this.doctorSvc.getAll({ page_size: '1000' }).subscribe(r => {
+        this.doctors = r.results || r;
+        const preselect = this.route.snapshot.queryParamMap.get('doctor');
+        if (preselect) {
+          this.form.patchValue({ doctor_id: +preselect });
+        }
+      });
     }
     if (this.isDoctor) {
       this.medSvc.getAll({ page_size: '1000' }).subscribe(r => this.medications = r.results || r);

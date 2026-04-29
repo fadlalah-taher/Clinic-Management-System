@@ -50,7 +50,7 @@ import { Doctor } from '../../../models/models';
                 <div class="fw-semibold">Dr. {{ d.name }}</div>
                 <span class="badge bg-primary bg-opacity-10 text-primary small">{{ d.specialty }}</span>
                 <div class="text-muted small mt-1">{{ d.email }}</div>
-                <a routerLink="/appointments/new" class="btn btn-sm btn-success mt-2">
+                <a [routerLink]="['/appointments/new']" [queryParams]="{doctor: d.id}" class="btn btn-sm btn-success mt-2">
                   <i class="bi bi-calendar-plus me-1"></i> Book
                 </a>
               </div>

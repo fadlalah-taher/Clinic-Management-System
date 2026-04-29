@@ -22,6 +22,7 @@ class Doctor(models.Model):
     specialty = models.CharField(max_length=100, choices=SPECIALTY_CHOICES, default='general')
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
     profile_image = models.ImageField(upload_to='doctors/images/', blank=True, null=True)
     cv_document = models.FileField(upload_to='doctors/cv/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -26,22 +26,12 @@ import { User } from '../../../models/models';
             </a>
           </li>
           <li class="nav-item">
-            <a routerLink="/patients" routerLinkActive="active" class="nav-link">
-              <i class="bi bi-people"></i> Patients
-            </a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/doctors" routerLinkActive="active" class="nav-link">
-              <i class="bi bi-person-badge"></i> Doctors
-            </a>
-          </li>
-          <li class="nav-item">
             <a routerLink="/medications" routerLinkActive="active" class="nav-link">
               <i class="bi bi-capsule"></i> Medications
             </a>
           </li>
-          <li class="nav-item" *ngIf="doctorId">
-            <a [routerLink]="['/doctors', doctorId, 'edit']" routerLinkActive="active" class="nav-link">
+          <li class="nav-item">
+            <a routerLink="/profile" routerLinkActive="active" class="nav-link">
               <i class="bi bi-person-gear"></i> My Profile
             </a>
           </li>
@@ -62,6 +52,11 @@ import { User } from '../../../models/models';
           <li class="nav-item">
             <a routerLink="/doctors" routerLinkActive="active" class="nav-link">
               <i class="bi bi-person-badge"></i> Our Doctors
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/profile" routerLinkActive="active" class="nav-link">
+              <i class="bi bi-person-gear"></i> My Profile
             </a>
           </li>
         </ng-container>

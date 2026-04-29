@@ -18,7 +18,10 @@ export interface Patient {
   email: string;
   phone?: string;
   address?: string;
+  profile_image?: string;
+  health_book?: string;
   profile_image_url?: string;
+  health_book_url?: string;
   medical_report_url?: string;
   created_at?: string;
 }
@@ -57,11 +60,23 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  role?: 'doctor' | 'patient';
+  role?: 'doctor' | 'patient' | 'admin';
+  // Doctor-specific
   doctor_id?: number;
   doctor_name?: string;
   doctor_specialty?: string;
+  doctor_phone?: string;
+  doctor_email?: string;
+  // Patient-specific
   patient_mongo_id?: string;
+  patient_name?: string;
+  patient_phone?: string;
+  patient_address?: string;
+  patient_dob?: string;
+  // Shared file URLs
+  profile_image_url?: string;
+  cv_document_url?: string;
+  health_book_url?: string;
 }
 
 export interface AuthResponse {

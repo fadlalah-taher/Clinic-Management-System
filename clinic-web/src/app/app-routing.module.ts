@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard, DoctorGuard, PatientGuard } from './guards/auth.guard';
+import { AuthGuard, DoctorGuard, PatientGuard, NotDoctorGuard } from './guards/auth.guard';
 
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
+import { ProfileComponent } from './components/auth/profile/profile.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { DoctorListComponent } from './components/doctors/doctor-list/doctor-list.component';
 import { DoctorFormComponent } from './components/doctors/doctor-form/doctor-form.component';
@@ -27,17 +28,20 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
 
+      // ── Shared profile page (both roles) ───────────────────────────
+      { path: 'profile', component: ProfileComponent },
+
       // ── Doctors (visible to all; edit restricted to doctor-owner) ──
-      { path: 'doctors', component: DoctorListComponent },
+      { path: 'doctors', component: DoctorListComponent, canActivate: [NotDoctorGuard] },
       { path: 'doctors/new', component: DoctorFormComponent, canActivate: [DoctorGuard] },
-      { path: 'doctors/:id', component: DoctorDetailComponent },
+      { path: 'doctors/:id', component: DoctorDetailComponent, canActivate: [NotDoctorGuard] },
       { path: 'doctors/:id/edit', component: DoctorFormComponent, canActivate: [DoctorGuard] },
 
-      // ── Patients (doctor only) ──────────────────────────────────────
-      { path: 'patients', component: PatientListComponent, canActivate: [DoctorGuard] },
-      { path: 'patients/new', component: PatientFormComponent, canActivate: [DoctorGuard] },
-      { path: 'patients/:id', component: PatientDetailComponent, canActivate: [DoctorGuard] },
-      { path: 'patients/:id/edit', component: PatientFormComponent, canActivate: [DoctorGuard] },
+      // ── Patients (non-doctor only) ──────────────────────────────────────
+      { path: 'patients', component: PatientListComponent, canActivate: [NotDoctorGuard] },
+      { path: 'patients/new', component: PatientFormComponent, canActivate: [NotDoctorGuard] },
+      { path: 'patients/:id', component: PatientDetailComponent, canActivate: [NotDoctorGuard] },
+      { path: 'patients/:id/edit', component: PatientFormComponent, canActivate: [NotDoctorGuard] },
 
       // ── Medications (doctor can manage; patient read-only) ──────────
       { path: 'medications', component: MedicationListComponent },

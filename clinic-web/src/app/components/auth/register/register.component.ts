@@ -108,6 +108,12 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
                   <input formControlName="phone" type="tel" class="form-control" placeholder="+1 (555) 000-0000">
                 </div>
               </div>
+              <div class="row">
+                <div class="col-6 mb-3">
+                  <label class="form-label">Date of Birth</label>
+                  <input formControlName="date_of_birth" type="date" class="form-control">
+                </div>
+              </div>
             </ng-container>
 
             <!-- Patient-specific fields -->
@@ -231,7 +237,10 @@ export class RegisterComponent implements OnInit {
     }
 
     this.loading = true;
-    this.auth.register(this.form.value).subscribe({
+    const payload = { ...this.form.value };
+    if (role === 'doctor') { delete payload['address']; }
+    if (role === 'patient') { delete payload['specialty']; delete payload['phone']; }
+    this.auth.register(payload).subscribe({
       next: () => { this.success = true; this.loading = false; },
       error: (err) => {
         const e = err.error;

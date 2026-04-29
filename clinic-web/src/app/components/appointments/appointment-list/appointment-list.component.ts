@@ -75,8 +75,20 @@ import { Appointment } from '../../../models/models';
                   <i class="bi bi-x-circle"></i>
                 </button>
               </ng-container>
-              <!-- Doctor can view details and delete -->
+              <!-- Doctor: quick status change + edit + delete -->
               <ng-container *ngIf="isDoctor">
+                <button *ngIf="a.status === 'scheduled'"
+                  (click)="markComplete(a)"
+                  class="btn btn-sm btn-success me-1"
+                  title="Mark as Completed">
+                  <i class="bi bi-check-circle"></i>
+                </button>
+                <button *ngIf="a.status === 'completed'"
+                  (click)="markScheduled(a)"
+                  class="btn btn-sm btn-warning me-1"
+                  title="Revert to Scheduled">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
                 <a [routerLink]="['/appointments', a.id, 'edit']" class="btn btn-sm btn-outline-secondary me-1">
                   <i class="bi bi-pencil"></i>
                 </a>
@@ -151,7 +163,7 @@ export class AppointmentListComponent implements OnInit {
       params['patient'] = this.auth.getPatientMongoId()!;
     }
     this.svc.getAll(params).subscribe(r => {
-      this.appointments = r.results || r;
+      this.appointments = r.results || (r as any);
       this.total = r.count || this.appointments.length;
       this.next = r.next;
       this.prev = r.previous;
@@ -161,15 +173,21 @@ export class AppointmentListComponent implements OnInit {
 
   changePage(delta: number): void {
     this.page += delta;
-    this.svc.getAll({
+    const params: Record<string, string> = {
       search: this.search,
       status: this.status,
       date_after: this.dateAfter,
       date_before: this.dateBefore,
       ordering: this.ordering,
       page: String(this.page)
-    }).subscribe(r => {
-      this.appointments = r.results || r;
+    };
+    if (this.isDoctor && this.auth.getDoctorId()) {
+      params['doctor'] = this.auth.getDoctorId()!.toString();
+    } else if (this.isPatient && this.auth.getPatientMongoId()) {
+      params['patient'] = this.auth.getPatientMongoId()!;
+    }
+    this.svc.getAll(params).subscribe(r => {
+      this.appointments = r.results || (r as any);
       this.next = r.next;
       this.prev = r.previous;
     });
@@ -178,6 +196,16 @@ export class AppointmentListComponent implements OnInit {
   cancel(a: Appointment): void {
     if (!a.id || !confirm('Cancel this appointment?')) return;
     this.svc.update(a.id, { status: 'cancelled' }).subscribe(() => a.status = 'cancelled');
+  }
+
+  markComplete(a: Appointment): void {
+    if (!a.id) return;
+    this.svc.update(a.id, { status: 'completed' }).subscribe(() => a.status = 'completed');
+  }
+
+  markScheduled(a: Appointment): void {
+    if (!a.id) return;
+    this.svc.update(a.id, { status: 'scheduled' }).subscribe(() => a.status = 'scheduled');
   }
 
   deleteAppt(a: Appointment): void {

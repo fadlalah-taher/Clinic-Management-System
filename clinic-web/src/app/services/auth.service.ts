@@ -36,6 +36,24 @@ export class AuthService {
     );
   }
 
+  /** GET full profile including file URLs and role-specific fields. */
+  getProfile(): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/auth/profile/`);
+  }
+
+  /** PATCH profile — accepts FormData with optional file fields. */
+  updateProfile(data: FormData): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/auth/profile/`, data).pipe(
+      tap(updated => {
+        // Merge only the core User fields back into the subject
+        const current = this.currentUserSubject.value;
+        if (current) {
+          this.currentUserSubject.next({ ...current, ...updated });
+        }
+      })
+    );
+  }
+
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
@@ -53,7 +71,7 @@ export class AuthService {
 
   // ── Role helpers ──────────────────────────────────────
   getRole(): string {
-    return this.currentUserSubject.value?.role || 'patient';
+    return this.currentUserSubject.value?.role || '';
   }
 
   isDoctor(): boolean {
@@ -76,3 +94,4 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 }
+
