@@ -16,6 +16,11 @@ export class AppointmentService {
     return this.http.get<PaginatedResponse<Appointment>>(this.url, { params: httpParams });
   }
 
+  // Get appointments for the logged-in patient
+  getMyAppointments(): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${environment.apiUrl}/my/appointments/`);
+  }
+
   getById(id: string): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.url}${id}/`);
   }
