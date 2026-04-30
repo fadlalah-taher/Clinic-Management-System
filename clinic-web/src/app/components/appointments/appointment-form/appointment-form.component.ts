@@ -247,7 +247,7 @@ export class AppointmentFormComponent implements OnInit {
         patient_id: this.auth.getPatientMongoId(),
         doctor_id: this.f['doctor_id'].value,
         date: this.f['date'].value,
-        contact_email: this.f['contact_email'].value,
+        // contact_email: this.f['contact_email'].value,
         reason: this.f['reason'].value,
         symptoms: this.f['symptoms'].value,
         duration: this.f['duration'].value,
