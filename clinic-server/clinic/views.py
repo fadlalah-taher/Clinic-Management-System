@@ -54,7 +54,9 @@ def _get_doctor_data(doctor_id):
             'email': d.email,
             'phone': d.phone,
         }
-    except (Doctor.DoesNotExist, (ValueError, TypeError)):
+    except Doctor.DoesNotExist:
+        return None
+    except (ValueError, TypeError):
         return None
 
 
