@@ -266,10 +266,16 @@ export class DashboardComponent implements OnInit {
 
   loadPatientData(patientId: string): void {
     this.loadingAppts = true;
-    this.apptSvc.getAll({ patient: patientId }).subscribe(r => {
-      this.patientAppointments = r.results || r;
-      this.loadingAppts = false;
-    }, () => this.loadingAppts = false);
+    // Use dedicated endpoint for patients
+    this.apptSvc.getMyAppointments().subscribe({
+      next: (appointments) => {
+        this.patientAppointments = appointments;
+        this.loadingAppts = false;
+      },
+      error: () => {
+        this.loadingAppts = false;
+      }
+    });
   }
 
   cancelAppointment(a: Appointment): void {
