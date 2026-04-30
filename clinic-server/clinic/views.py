@@ -276,6 +276,45 @@ class PatientAppointmentsView(APIView):
 
 
 # ─────────────────────────────────────────────────────────────
+# Patient Self-Service Endpoints
+# ─────────────────────────────────────────────────────────────
+
+class MyAppointmentsView(APIView):
+    """Get appointments for the currently logged-in patient"""
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            profile = request.user.profile
+            if profile.role != 'patient':
+                return Response(
+                    {'detail': 'This endpoint is only for patients.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            if not profile.patient_mongo_id:
+                return Response(
+                    {'detail': 'Patient profile not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Get all appointments for this patient
+            cursor = appointments_collection.find({'patient_id': profile.patient_mongo_id})
+            results = []
+            for doc in cursor:
+                doc = _serialize_doc(doc)
+                doc['doctor_detail'] = _get_doctor_data(doc.get('doctor_id'))
+                doc['medications_detail'] = _get_medication_data(doc.get('medication_ids', []))
+                results.append(doc)
+            
+            return Response(results)
+            
+        except Exception as e:
+            return Response(
+                {'detail': f'Error: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+# ─────────────────────────────────────────────────────────────
 # Appointment — PyMongo
 # ─────────────────────────────────────────────────────────────
 
@@ -345,8 +384,27 @@ class AppointmentListCreateView(APIView):
     def post(self, request):
         data = request.data.copy()
         from datetime import datetime
+        
+        # 🔥 NEW CODE - Auto-fill patient_id from logged-in user
+        try:
+            profile = request.user.profile
+            if profile.role == 'patient':
+                if not profile.patient_mongo_id:
+                    return Response({'detail': 'Patient profile not found. Please complete your registration.'}, 
+                                    status=status.HTTP_400_BAD_REQUEST)
+                # Automatically set patient_id for patients
+                data['patient_id'] = profile.patient_mongo_id
+            elif profile.role == 'doctor' and not data.get('patient_id'):
+                # Doctors must provide patient_id when booking
+                return Response({'patient_id': ['Patient ID is required for doctors to book appointments.']},
+                                status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'detail': f'User profile error: {str(e)}'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
         data['created_at'] = datetime.utcnow().isoformat()
 
+        # Validate required fields
         errors = {}
         if not data.get('patient_id'):
             errors['patient_id'] = ['This field is required.']

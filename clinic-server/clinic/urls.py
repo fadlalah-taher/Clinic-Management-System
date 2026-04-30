@@ -8,6 +8,7 @@ from .views import (
     PatientAppointmentsView,
     AppointmentListCreateView,
     AppointmentDetailView,
+    MyAppointmentsView,
 )
 
 # SQL-backed resources use the DRF router
@@ -17,6 +18,8 @@ router.register('medications', MedicationViewSet, basename='medication')
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    path('my/appointments/', MyAppointmentsView.as_view(), name='my-appointments'),
 
     # MongoDB-backed patients
     path('patients/', PatientListCreateView.as_view(), name='patient-list'),
